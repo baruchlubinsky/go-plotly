@@ -2,12 +2,49 @@ package plotly
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"bytes"
+	"os"
 )
+
+func init() {
+	username = os.Getenv("PLOTLY_USERNAME")
+	apikey = os.Getenv("PLOTLY_APIKEY")
+	var credentialsFile *os.File
+	files := []string{
+		"~/plotly_credentials.json",
+		"~/.plotly_credentials.json",
+		"plotly_credentials.json",
+		".plotly_credentials.json",
+	}
+	for _, path := range files {
+		file, err := os.Open(path)
+		if err == nil {
+			credentialsFile = file
+		}
+	}
+	if credentialsFile != nil {
+		data, err := ioutil.ReadAll(credentialsFile)
+		if err != nil {
+			panic("Unable to read supplied credential file.")
+		}
+		credentials := struct{
+			Username string
+			Apikey string
+		}{}
+		err = json.Unmarshal(data, &credentials)
+		if err != nil {
+			panic("Badly formatted credentials file: " + credentialsFile.Name())
+		}
+		username = credentials.Username
+		apikey = credentials.Apikey
+	}
+	if username == "" || apikey == "" {
+		panic("Cannot use plotly, no credentials have been supplied.")
+	}
+}
 
 const ROOTURL = "https://plot.ly/"
 const POSTURL = ROOTURL + "clientresp/"
@@ -16,8 +53,8 @@ const IMAGEURL = ROOTURL + "apigenimage/"
 const VERSION = "2.0"
 const PLATFORM = "golang"
 
-var username = "baruchlubinsky"
-var apikey = "knk0dbvmeu"
+var username string
+var apikey string
 
 type Request struct {
 	Un       string
@@ -60,6 +97,16 @@ type DownloadResponse struct {
 	Error string
 }
 
+func NewRequest() *Request {
+	var request = Request{
+		Un: username,
+		Key: apikey,
+		Platform: PLATFORM,
+		Version: VERSION,
+	}
+	return &request
+}
+
 func (r *Request) urlEncode() url.Values {
 	v := url.Values{}
 	v.Set("un", r.Un)
@@ -79,7 +126,7 @@ func setHeaders(request *http.Request) {
 	request.Header.Set("plotly-platform", PLATFORM)
 }
 
-func Post(data Request) (result PostResponse, err error) {
+func Post(data *Request) (result PostResponse, err error) {
 	client := http.DefaultClient
 	response, err := client.PostForm(POSTURL, data.urlEncode())
 	if err != nil {
@@ -114,7 +161,6 @@ func Download(figure Figure, filename string) (err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println(string(data))
 	request, _ := http.NewRequest("POST", IMAGEURL, bytes.NewReader(data))
 	setHeaders(request)
 	client := http.DefaultClient
