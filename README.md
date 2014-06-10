@@ -1,7 +1,7 @@
 Plotly Go API
 =
 
-This package provides wrapper functions for [Plotly](https://plot/ly)'s HTTP API.
+This package provides wrapper functions for [Plotly](https://plot.ly)'s HTTP API.
 
 At the time of writing that API is largely undocumented so the work here is based on
 the [Pyhton API](https://github.com/plotly/python-api).
@@ -11,6 +11,7 @@ Authentication
 
 In order to use this package you require API credentials from Plotly. These may
 be stored in:
+
 1. `.plotly_credentials.json`
 2. `plotly_credentials.json`
 3. `~/.plotly_credentials.json`
