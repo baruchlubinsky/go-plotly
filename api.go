@@ -1,11 +1,11 @@
 package plotly
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"bytes"
 	"os"
 	"strings"
 )
@@ -32,9 +32,9 @@ func init() {
 		if err != nil {
 			panic("Unable to read supplied credential file.")
 		}
-		credentials := struct{
+		credentials := struct {
 			Username string
-			Apikey string
+			Apikey   string
 		}{}
 		err = json.Unmarshal(data, &credentials)
 		if err != nil {
@@ -70,9 +70,9 @@ type Request struct {
 }
 
 type Response struct {
-	ErrorMessage    string `json:"error"`
-	Warning  string
-	Message  string
+	ErrorMessage string `json:"error"`
+	Warning      string
+	Message      string
 }
 
 type PostResponse struct {
@@ -97,17 +97,17 @@ type DownloadResponse struct {
 
 type Figure struct {
 	Layout interface{} `json:"layout"`
-	Data interface{} `json:"data"`
+	Data   interface{} `json:"data"`
 }
 
 type Url string
 
 func NewRequest() *Request {
 	var request = Request{
-		Un: username,
-		Key: apikey,
+		Un:       username,
+		Key:      apikey,
 		Platform: PLATFORM,
-		Version: VERSION,
+		Version:  VERSION,
 	}
 	return &request
 }
@@ -148,7 +148,7 @@ func Post(data *Request) (result PostResponse, err error) {
 
 func Get(id string) (result *GetResponse, err error) {
 	checkCredentials()
-	request, _ := http.NewRequest("GET", GETURL + username + "/" + id, nil)
+	request, _ := http.NewRequest("GET", GETURL+username+"/"+id, nil)
 	setHeaders(request)
 	client := http.DefaultClient
 	response, err := client.Do(request)
@@ -164,7 +164,8 @@ func Get(id string) (result *GetResponse, err error) {
 }
 
 func Download(figure Figure, filename string) (err error) {
-	data, err := json.Marshal(figure)
+	payload := Payload{Figure: figure}
+	data, err := json.Marshal(payload)
 	if err != nil {
 		return
 	}
@@ -179,12 +180,12 @@ func Download(figure Figure, filename string) (err error) {
 	if err != nil {
 		return
 	}
-	var result = DownloadResponse{}
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		return
-	}
-	err = ioutil.WriteFile(filename, result.Payload, 0777)
+	// var result = DownloadResponse{}
+	// err = json.Unmarshal(body, &result)
+	// if err != nil {
+	// 	return
+	// }
+	err = ioutil.WriteFile(filename, body, 0777)
 	return
 }
 
