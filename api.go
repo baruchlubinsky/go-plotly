@@ -16,8 +16,8 @@ func init() {
 	authenticated = true
 	var credentialsFile *os.File
 	files := []string{
-		"~/plotly_credentials.json",
-		"~/.plotly_credentials.json",
+		"/etc/plotly/plotly_credentials.json",
+		"/etc/plotly/.plotly_credentials.json",
 		"plotly_credentials.json",
 		".plotly_credentials.json",
 	}

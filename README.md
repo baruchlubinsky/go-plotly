@@ -14,8 +14,8 @@ be stored in:
 
 1. `.plotly_credentials.json`
 2. `plotly_credentials.json`
-3. `~/.plotly_credentials.json`
-4. `~/plotly_credentials.json`
+3. `/etc/plotly/.plotly_credentials.json`
+4. `/etc/plotly/plotly_credentials.json`
 5. Environment variables named `PLOTLY_USERNAME` and `PLOTLY_APIKEY`
 
 If more than one of these are available, the highest one in the list takes preference.

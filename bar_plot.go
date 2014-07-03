@@ -4,19 +4,25 @@ import (
 	"fmt"
 )
 
-func StackedBarPlot(categories []interface{}, data map[string][]interface{}, filename string, title string, xTitle string, yTitle string, public bool) (Url, error) {
+func StackedBarPlot(categories []string, data map[string][]interface{}, filename string, title string, xTitle string, yTitle string, public bool) (Url, error) {
 	traces := make([]Trace, 0, len(data))
-	for key, values := range data {
+	for i, category := range categories {
+		x := make([]interface{}, 0)
+		y := make([]interface{}, 0)
+		for key, values := range data {
+			x = append(x, key)
+			y = append(y, values[i])
+		}
 		traces = append(traces, Trace{
-			X:    values,
-			Y:    categories,
-			Name: key,
+			X:    x,
+			Y:    y,
+			Name: category,
 			Type: "bar",
 		})
 	}
 	layout := fmt.Sprintf(`{
     "title":"%v",
-    "barmode":"stacked",
+    "barmode":"stack",
     "yaxis":{
       "title":"%v"
     },
