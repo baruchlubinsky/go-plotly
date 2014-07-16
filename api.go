@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -18,6 +19,8 @@ func init() {
 	files := []string{
 		"/etc/plotly/plotly_credentials.json",
 		"/etc/plotly/.plotly_credentials.json",
+		path.Join(os.Getenv("HOME"), "plotly_credentials.json"),
+		path.Join(os.Getenv("HOME"), ".plotly_credentials.json"),
 		"plotly_credentials.json",
 		".plotly_credentials.json",
 	}
@@ -180,11 +183,6 @@ func Download(figure Figure, filename string) (err error) {
 	if err != nil {
 		return
 	}
-	// var result = DownloadResponse{}
-	// err = json.Unmarshal(body, &result)
-	// if err != nil {
-	// 	return
-	// }
 	err = ioutil.WriteFile(filename, body, 0777)
 	return
 }

@@ -4,7 +4,10 @@ import (
 	"fmt"
 )
 
-func StackedBarPlot(categories []string, data map[string][]interface{}, filename string, title string, xTitle string, yTitle string, public bool) (Url, error) {
+// Create a stacked bar plot.
+// Data contains one entry for each point on the x-axis, refering to a slice with
+// values for each of the categories.
+func StackedBarPlot(categories []string, colors []string, data map[string][]interface{}, filename string, title string, xTitle string, yTitle string, public bool) (Url, error) {
 	traces := make([]Trace, 0, len(data))
 	for i, category := range categories {
 		x := make([]interface{}, 0)
@@ -18,6 +21,9 @@ func StackedBarPlot(categories []string, data map[string][]interface{}, filename
 			Y:    y,
 			Name: category,
 			Type: "bar",
+			Marker: Marker{
+				Color: colors[i],
+			},
 		})
 	}
 	layout := fmt.Sprintf(`{

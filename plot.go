@@ -19,6 +19,7 @@ type Trace struct {
 type Marker struct {
 	Line    Line    `json:"line"`
 	Opacity float64 `json:"opacity"`
+	Color   string  `json:"color"`
 }
 
 type Line struct {
