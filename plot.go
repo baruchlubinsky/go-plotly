@@ -11,19 +11,19 @@ type Trace struct {
 	Name   string        `json:"name"`
 	YAxis  string        `json:"yaxis"`
 	Type   string        `json:"type"`
-	Marker Marker        `json:"marker"`
-	Line   Line          `json:"line"`
+	Marker Marker        `json:"marker,omitempty"`
+	Line   Line          `json:"line,omitempty"`
 	Fill   string        `json:"fill,omitempty"`
 }
 
 type Marker struct {
-	Line    Line    `json:"line"`
+	Line    Line    `json:"line,omitempty"`
 	Opacity float64 `json:"opacity"`
 	Color   string  `json:"color"`
 }
 
 type Line struct {
-	Color string `json:"color"`
+	Color string `json:"color,omitempty"`
 }
 
 func Create(filename string, figure Figure, public bool) (url Url, err error) {
