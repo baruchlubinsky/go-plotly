@@ -1,7 +1,6 @@
 package plotly
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -28,24 +27,25 @@ func init() {
 		file, err := os.Open(path)
 		if err == nil {
 			credentialsFile = file
+			data, err := ioutil.ReadAll(credentialsFile)
+			if err != nil {
+				println("Cannot read " + file.Name())
+				continue
+			}
+			credentials := struct {
+				Username string
+				Apikey   string
+			}{}
+			err = json.Unmarshal(data, &credentials)
+			if err != nil {
+				println("Badly fomatted " + file.Name())
+				continue
+			}
+			username = credentials.Username
+			apikey = credentials.Apikey
 		}
 	}
-	if credentialsFile != nil {
-		data, err := ioutil.ReadAll(credentialsFile)
-		if err != nil {
-			panic("Unable to read supplied credential file.")
-		}
-		credentials := struct {
-			Username string
-			Apikey   string
-		}{}
-		err = json.Unmarshal(data, &credentials)
-		if err != nil {
-			panic("Badly formatted credentials file: " + credentialsFile.Name())
-		}
-		username = credentials.Username
-		apikey = credentials.Apikey
-	}
+
 	if username == "" || apikey == "" {
 		authenticated = false
 	}
@@ -103,6 +103,12 @@ type Figure struct {
 	Data   interface{} `json:"data"`
 }
 
+type PlotlyError string
+
+func (e PlotlyError) Error() string {
+	return e
+}
+
 type Url string
 
 func NewRequest() *Request {
@@ -135,7 +141,9 @@ func setHeaders(request *http.Request) {
 }
 
 func Post(data *Request) (result PostResponse, err error) {
-	checkCredentials()
+	if !CheckCredentials() {
+		return nil, PlotlyError("Not authenticated")
+	}
 	client := http.DefaultClient
 	response, err := client.PostForm(POSTURL, data.urlEncode())
 	if err != nil {
@@ -150,7 +158,9 @@ func Post(data *Request) (result PostResponse, err error) {
 }
 
 func Get(id string) (result *GetResponse, err error) {
-	checkCredentials()
+	if !CheckCredentials() {
+		return nil, PlotlyError("Not authenticated")
+	}
 	request, _ := http.NewRequest("GET", GETURL+username+"/"+id, nil)
 	setHeaders(request)
 	client := http.DefaultClient
@@ -163,27 +173,6 @@ func Get(id string) (result *GetResponse, err error) {
 		return
 	}
 	err = json.Unmarshal(body, &result)
-	return
-}
-
-func Download(figure Figure, filename string) (err error) {
-	payload := Payload{Figure: figure}
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return
-	}
-	request, _ := http.NewRequest("POST", IMAGEURL, bytes.NewReader(data))
-	setHeaders(request)
-	client := http.DefaultClient
-	response, err := client.Do(request)
-	if err != nil {
-		return
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return
-	}
-	err = ioutil.WriteFile(filename, body, 0777)
 	return
 }
 
@@ -200,13 +189,13 @@ func (r Response) Error() string {
 		return r.ErrorMessage
 	} else if r.Warning != "" {
 		return r.Warning
+	} else if r.Message != "" {
+		return r.Message
 	} else {
 		return "An unspecified error occured at Plot.ly"
 	}
 }
 
-func checkCredentials() {
-	if !authenticated {
-		panic("Unable to connect to API, no credentials have been supplied.")
-	}
+func CheckCredentials() bool {
+	return authenticated
 }

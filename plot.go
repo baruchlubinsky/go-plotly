@@ -1,8 +1,11 @@
 package plotly
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 )
 
 type Trace struct {
@@ -47,6 +50,27 @@ func Create(filename string, figure Figure, public bool) (url Url, err error) {
 		return Url(""), result
 	}
 	return Url(result.Url), nil
+}
+
+func Download(figure Figure, filename string) (err error) {
+	payload := Payload{Figure: figure}
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	request, _ := http.NewRequest("POST", IMAGEURL, bytes.NewReader(data))
+	setHeaders(request)
+	client := http.DefaultClient
+	response, err := client.Do(request)
+	if err != nil {
+		return
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
+	err = ioutil.WriteFile(filename, body, 0777)
+	return
 }
 
 func Save(id string, filename string) error {
