@@ -106,7 +106,7 @@ type Figure struct {
 type PlotlyError string
 
 func (e PlotlyError) Error() string {
-	return e
+	return string(e)
 }
 
 type Url string
@@ -142,7 +142,7 @@ func setHeaders(request *http.Request) {
 
 func Post(data *Request) (result PostResponse, err error) {
 	if !CheckCredentials() {
-		return nil, PlotlyError("Not authenticated")
+		return PostResponse{}, PlotlyError("Not authenticated")
 	}
 	client := http.DefaultClient
 	response, err := client.PostForm(POSTURL, data.urlEncode())
