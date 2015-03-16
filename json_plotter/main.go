@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/baruchlubinsky/plotly"
+	plotly "github.com/baruchlubinsky/go-plotly"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"

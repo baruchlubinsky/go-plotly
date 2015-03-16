@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/baruchlubinsky/plotly"
+	plotly "github.com/baruchlubinsky/go-plotly"
 	"io/ioutil"
 	"net/http"
 	"strings"
